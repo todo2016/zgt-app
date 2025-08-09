@@ -1,0 +1,21 @@
+---
+description: 后端阶段规则 - 基于接口文档和 mock 数据开发 API 和数据库
+globs:
+  - "backend/**/*.py"
+  - "backend/**/*.sql"
+alwaysApply: false
+---
+# 后端开发要求
+- 技术栈：FastAPI + MySQL
+- 按 `/docs/api/api-spec.md` 定义实现 API
+- 返回格式必须符合全局规则定义
+- 数据库表结构按 `/docs/prototype/data-fields.md` 设计
+
+# 产物安排
+- API 源码（`/backend/api/**`）
+- 数据库建表 SQL（`/backend/db/schema.sql`）
+- 部署说明（`/backend/README.md`）
+
+# 衔接要求
+- API 入参/出参必须与 `/mock/api.json` 完全一致
+- 数据库字段与数据字段列表保持一致

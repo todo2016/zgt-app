@@ -1,0 +1,28 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 技术栈要求
+- 使用 uniapp，vue3 语法，组合式 API
+- 状态管理用 pinia
+- 页面和组件尽量拆分，保证复用性
+- 接口调用使用 uni.request，封装到 api 目录
+- 统一使用 ES6+ 语法，禁止 var
+
+# 代码风格
+- 组件命名用 PascalCase
+- 文件命名用 kebab-case
+- CSS 使用 scoped，优先使用 flex 布局
+- 注释简洁，关键逻辑需中文说明
+
+# 开发约定
+- 所有页面放在 pages 目录，组件放在 components 目录
+- 请求前后要有 loading 提示
+- 出错时使用 uni.showToast 提示
+- API 地址从 config 读取，方便切换环境
+
+# AI 生成要求
+- 所有生成的页面必须可直接运行
+- 提供完整的 <template>、<script>、<style> 结构
+- 不要省略代码，不要只写片段

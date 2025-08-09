@@ -1,0 +1,23 @@
+---
+description: 前端阶段规则 - 基于原型实现 UI、生成 mock 数据和接口文档
+globs:
+  - "**/*.vue"
+  - "**/*.js"
+  - "mock/**/*.json"
+alwaysApply: false
+---
+# 前端开发要求
+- 按原型阶段的 `/docs/prototype` 文件开发
+- 使用 uniapp + vue3 + pinia
+- 组件拆分合理，样式 scoped
+- 所有接口调用封装到 `/api` 目录
+- 使用 `/mock/api.json` 作为数据源
+
+# 产物安排
+- 可运行页面代码（`/pages/**`）
+- Mock 数据文件（`/mock/api.json`）
+- 接口文档（`/docs/api/api-spec.md`）
+
+# 衔接要求
+- `/mock/api.json` 字段必须与原型数据字段一致
+- `/docs/api/api-spec.md` 将作为后端 API 开发依据

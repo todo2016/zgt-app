@@ -1,0 +1,25 @@
+---
+description: 掌柜通项目全局开发规则
+globs:
+  - "**/*"
+alwaysApply: true
+---
+# 技术栈
+- 前端：uniapp + vue3 + pinia
+- 后端：Java Spring Boot
+- 数据库：MySQL
+- 接口：RESTful，JSON 返回
+
+# 命名规范
+- 组件：PascalCase
+- 文件：kebab-case
+- 表：snake_case
+- API 路径小写，单词用中划线
+
+# 接口返回格式
+```json
+{
+  "code": 0,
+  "message": "ok",
+  "data": {}
+}
