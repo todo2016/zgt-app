@@ -2,6 +2,7 @@
 const common_vendor = require("../common/vendor.js");
 const utils_auth = require("../utils/auth.js");
 const api_user = require("../api/user.js");
+const utils_wechat = require("../utils/wechat.js");
 const useUserStore = common_vendor.defineStore("user", () => {
   const token = common_vendor.ref(utils_auth.getToken() || "");
   const userInfo = common_vendor.ref(null);
@@ -21,6 +22,27 @@ const useUserStore = common_vendor.defineStore("user", () => {
       utils_auth.setUserInfo(data.userInfo);
       return data;
     } catch (error) {
+      throw error;
+    }
+  };
+  const wechatLogin = async () => {
+    try {
+      const loginResult = await utils_wechat.wechatLogin();
+      if (loginResult.code) {
+        const data = await api_user.wechatLogin({
+          code: loginResult.code
+        });
+        token.value = data.token;
+        userInfo.value = data.userInfo;
+        isLogin.value = true;
+        utils_auth.setToken(data.token);
+        utils_auth.setUserInfo(data.userInfo);
+        return data;
+      } else {
+        throw new Error("微信登录失败：未获取到授权码");
+      }
+    } catch (error) {
+      common_vendor.index.__f__("error", "at stores/user.js:64", "微信登录失败:", error);
       throw error;
     }
   };
@@ -50,7 +72,7 @@ const useUserStore = common_vendor.defineStore("user", () => {
         await api_user.logout();
       }
     } catch (error) {
-      common_vendor.index.__f__("error", "at stores/user.js:68", "登出失败:", error);
+      common_vendor.index.__f__("error", "at stores/user.js:100", "登出失败:", error);
     } finally {
       token.value = "";
       userInfo.value = null;
@@ -78,6 +100,7 @@ const useUserStore = common_vendor.defineStore("user", () => {
     userId,
     // 方法
     login,
+    wechatLogin,
     fetchUserInfo,
     updateUserInfo,
     logout,

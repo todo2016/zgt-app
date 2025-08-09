@@ -84,6 +84,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '../../stores/user'
+import { setupWechatShare } from '../../utils/wechat'
 
 // 用户store
 const userStore = useUserStore()
@@ -191,6 +192,13 @@ const initPage = () => {
   
   // 获取用户信息
   fetchUserInfo()
+  
+  // 设置微信分享
+  setupWechatShare({
+    title: 'ZGT应用 - 智能管理平台',
+    desc: '欢迎使用ZGT应用，体验智能管理服务',
+    imageUrl: '/static/logo.png'
+  })
 }
 
 // 获取用户信息

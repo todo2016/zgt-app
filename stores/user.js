@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { setToken, removeToken, setUserInfo, removeUserInfo, getToken } from '../utils/auth'
 import * as userApi from '../api/user'
+import { wechatLogin as wechatLoginUtil } from '../utils/wechat'
 
 export const useUserStore = defineStore('user', () => {
   // 状态
@@ -30,6 +31,37 @@ export const useUserStore = defineStore('user', () => {
       
       return data
     } catch (error) {
+      throw error
+    }
+  }
+
+  // 微信登录
+  const wechatLogin = async () => {
+    try {
+      // 获取微信登录凭证
+      const loginResult = await wechatLoginUtil()
+      
+      if (loginResult.code) {
+        // 调用后端API，用code换取用户信息
+        const data = await userApi.wechatLogin({
+          code: loginResult.code
+        })
+        
+        // 保存token和用户信息
+        token.value = data.token
+        userInfo.value = data.userInfo
+        isLogin.value = true
+        
+        // 存储到本地
+        setToken(data.token)
+        setUserInfo(data.userInfo)
+        
+        return data
+      } else {
+        throw new Error('微信登录失败：未获取到授权码')
+      }
+    } catch (error) {
+      console.error('微信登录失败:', error)
       throw error
     }
   }
@@ -101,6 +133,7 @@ export const useUserStore = defineStore('user', () => {
     
     // 方法
     login,
+    wechatLogin,
     fetchUserInfo,
     updateUserInfo,
     logout,

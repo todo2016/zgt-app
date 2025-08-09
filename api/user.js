@@ -6,6 +6,11 @@ export const login = (data) => {
   return post('/user/login', data)
 }
 
+// 微信登录
+export const wechatLogin = (data) => {
+  return post('/user/wechat-login', data)
+}
+
 // 用户注册
 export const register = (data) => {
   return post('/user/register', data)

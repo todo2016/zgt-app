@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const stores_user = require("../../stores/user.js");
+const utils_wechat = require("../../utils/wechat.js");
 const _sfc_main = {
   __name: "index",
   setup(__props, { expose: __expose }) {
@@ -83,6 +84,11 @@ const _sfc_main = {
         return;
       }
       fetchUserInfo();
+      utils_wechat.setupWechatShare({
+        title: "ZGT应用 - 智能管理平台",
+        desc: "欢迎使用ZGT应用，体验智能管理服务",
+        imageUrl: "/static/logo.png"
+      });
     };
     const fetchUserInfo = async () => {
       try {
@@ -93,7 +99,7 @@ const _sfc_main = {
           userInfo.value = data;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:206", "获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:214", "获取用户信息失败:", error);
         common_vendor.index.showToast({
           title: "获取用户信息失败",
           icon: "none"
@@ -124,7 +130,7 @@ const _sfc_main = {
                 });
               }, 1500);
             } catch (error) {
-              common_vendor.index.__f__("error", "at pages/index/index.vue:242", "登出失败:", error);
+              common_vendor.index.__f__("error", "at pages/index/index.vue:250", "登出失败:", error);
             }
           }
         }

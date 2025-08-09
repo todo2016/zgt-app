@@ -101,6 +101,33 @@ const mockGetUserInfo = (token) => {
     };
   }
 };
+const mockWechatLogin = (code) => {
+  if (code) {
+    return {
+      success: true,
+      data: {
+        token: `wechat_token_${Date.now()}`,
+        userInfo: {
+          id: 3,
+          username: "wechat_user",
+          nickname: "微信用户",
+          role: "普通用户",
+          avatar: "/static/logo.png",
+          email: "",
+          phone: "",
+          openid: "mock_openid_" + Date.now(),
+          unionid: "mock_unionid_" + Date.now()
+        }
+      }
+    };
+  } else {
+    return {
+      success: false,
+      message: "微信登录失败：授权码无效"
+    };
+  }
+};
 exports.mockGetUserInfo = mockGetUserInfo;
 exports.mockLogin = mockLogin;
+exports.mockWechatLogin = mockWechatLogin;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/mock/user.js.map

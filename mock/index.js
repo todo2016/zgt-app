@@ -1,5 +1,5 @@
 // Mock 服务主入口
-import { mockLogin, mockGetUserInfo } from './user'
+import { mockLogin, mockGetUserInfo, mockWechatLogin } from './user'
 import { getCurrentMockConfig } from './config'
 
 // 获取当前配置
@@ -12,6 +12,13 @@ const mockRoutes = {
     handler: (data) => {
       const { username, password } = data
       return mockLogin(username, password)
+    }
+  },
+  '/api/user/wechat-login': {
+    method: 'POST',
+    handler: (data) => {
+      const { code } = data
+      return mockWechatLogin(code)
     }
   },
   '/api/user/info': {

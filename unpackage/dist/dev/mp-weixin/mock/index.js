@@ -11,6 +11,13 @@ const mockRoutes = {
       return mock_user.mockLogin(username, password);
     }
   },
+  "/api/user/wechat-login": {
+    method: "POST",
+    handler: (data) => {
+      const { code } = data;
+      return mock_user.mockWechatLogin(code);
+    }
+  },
   "/api/user/info": {
     method: "GET",
     handler: (token) => {
@@ -45,9 +52,9 @@ const mockRoutes = {
 };
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const setupMock = () => {
-  common_vendor.index.__f__("log", "at mock/index.js:55", "[Mock] 检查配置:", config);
+  common_vendor.index.__f__("log", "at mock/index.js:62", "[Mock] 检查配置:", config);
   if (!config.enabled) {
-    common_vendor.index.__f__("log", "at mock/index.js:57", "[Mock] Mock 服务未启用，跳过设置");
+    common_vendor.index.__f__("log", "at mock/index.js:64", "[Mock] Mock 服务未启用，跳过设置");
     return;
   }
   const originalRequest = common_vendor.index.request;
@@ -56,7 +63,7 @@ const setupMock = () => {
     const { url, method = "GET", data, success, fail, complete } = options;
     const urlPath = url.replace(/^https?:\/\/[^\/]+/, "");
     const mockRoute = mockRoutes[urlPath];
-    common_vendor.index.__f__("log", "at mock/index.js:73", `[Mock] 请求检查:`, {
+    common_vendor.index.__f__("log", "at mock/index.js:80", `[Mock] 请求检查:`, {
       originalUrl: url,
       urlPath,
       method,
@@ -65,7 +72,7 @@ const setupMock = () => {
     });
     if (mockRoute && mockRoute.method === method) {
       if (config.showLog) {
-        common_vendor.index.__f__("log", "at mock/index.js:83", `[Mock] ${method} ${url}`, data);
+        common_vendor.index.__f__("log", "at mock/index.js:90", `[Mock] ${method} ${url}`, data);
       }
       try {
         await delay(config.delay);
@@ -86,7 +93,7 @@ const setupMock = () => {
           }
         };
         if (config.showLog) {
-          common_vendor.index.__f__("log", "at mock/index.js:112", `[Mock] Response:`, response);
+          common_vendor.index.__f__("log", "at mock/index.js:119", `[Mock] Response:`, response);
         }
         if (success) {
           success(response);
@@ -117,20 +124,20 @@ const setupMock = () => {
       return originalRequest(options);
     }
   };
-  common_vendor.index.__f__("log", "at mock/index.js:153", "[Mock] 服务已启动");
+  common_vendor.index.__f__("log", "at mock/index.js:160", "[Mock] 服务已启动");
 };
 const stopMock = () => {
   if (config.enabled) {
-    common_vendor.index.__f__("log", "at mock/index.js:160", "[Mock] 服务已停止");
+    common_vendor.index.__f__("log", "at mock/index.js:167", "[Mock] 服务已停止");
   }
 };
 const toggleMock = () => {
   config.enabled = !config.enabled;
-  common_vendor.index.__f__("log", "at mock/index.js:167", `[Mock] 服务已${config.enabled ? "启动" : "停止"}`);
+  common_vendor.index.__f__("log", "at mock/index.js:174", `[Mock] 服务已${config.enabled ? "启动" : "停止"}`);
 };
 const setMockDelay = (delay2) => {
   config.delay = delay2;
-  common_vendor.index.__f__("log", "at mock/index.js:173", `[Mock] 延迟设置为 ${delay2}ms`);
+  common_vendor.index.__f__("log", "at mock/index.js:180", `[Mock] 延迟设置为 ${delay2}ms`);
 };
 exports.config = config;
 exports.setMockDelay = setMockDelay;

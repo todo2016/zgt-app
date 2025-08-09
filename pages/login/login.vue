@@ -62,10 +62,10 @@
       </button>
       
       <!-- 其他登录方式 -->
-      <view class="other-login">
+      <view class="other-login" v-if="isWechat">
         <text class="divider">其他登录方式</text>
         <view class="social-login">
-          <view class="social-item" @click="onWechatLogin">
+          <view class="social-item" @click="onWechatLogin" v-if="isMiniProgram">
             <text class="social-icon">💬</text>
             <text class="social-text">微信登录</text>
           </view>
@@ -86,8 +86,9 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { useUserStore } from '../../stores/user'
+import { isWechatEnv, isWechatMiniProgram } from '../../utils/wechat'
 
 // 用户store
 const userStore = useUserStore()
@@ -95,6 +96,8 @@ const userStore = useUserStore()
 // 响应式数据
 const loading = ref(false)
 const showPassword = ref(false)
+const isWechat = ref(false)
+const isMiniProgram = ref(false)
 
 const formData = reactive({
   username: '',
@@ -106,6 +109,35 @@ const formData = reactive({
 const canLogin = computed(() => {
   return formData.username.trim() && formData.password.trim()
 })
+
+// 生命周期
+onMounted(() => {
+  checkEnvironment()
+})
+
+// 检测当前环境
+const checkEnvironment = () => {
+  isWechat.value = isWechatEnv()
+  isMiniProgram.value = isWechatMiniProgram()
+  
+  console.log('当前环境:', {
+    isWechat: isWechat.value,
+    isMiniProgram: isMiniProgram.value
+  })
+  
+  // 如果是微信小程序，可以尝试自动登录
+  if (isMiniProgram.value) {
+    // 检查是否有有效的登录状态
+    if (userStore.checkLoginStatus()) {
+      // 自动跳转到首页
+      setTimeout(() => {
+        uni.reLaunch({
+          url: '/pages/index/index'
+        })
+      }, 1000)
+    }
+  }
+}
 
 // 切换密码显示
 const togglePassword = () => {
@@ -126,11 +158,35 @@ const onForgotPassword = () => {
 }
 
 // 微信登录
-const onWechatLogin = () => {
-  uni.showToast({
-    title: '微信登录功能开发中',
-    icon: 'none'
-  })
+const onWechatLogin = async () => {
+  try {
+    loading.value = true
+    
+    // 调用微信登录
+    await userStore.wechatLogin()
+    
+    // 登录成功提示
+    uni.showToast({
+      title: '微信登录成功',
+      icon: 'success'
+    })
+    
+    // 跳转到首页
+    setTimeout(() => {
+      uni.reLaunch({
+        url: '/pages/index/index'
+      })
+    }, 1500)
+    
+  } catch (error) {
+    console.error('微信登录失败:', error)
+    uni.showToast({
+      title: error.message || '微信登录失败，请重试',
+      icon: 'none'
+    })
+  } finally {
+    loading.value = false
+  }
 }
 
 // 手机登录

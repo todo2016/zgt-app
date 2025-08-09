@@ -109,3 +109,32 @@ export const mockGetUserInfo = (token) => {
     }
   }
 }
+
+// 模拟微信登录
+export const mockWechatLogin = (code) => {
+  // 模拟微信登录成功
+  if (code) {
+    return {
+      success: true,
+      data: {
+        token: `wechat_token_${Date.now()}`,
+        userInfo: {
+          id: 3,
+          username: 'wechat_user',
+          nickname: '微信用户',
+          role: '普通用户',
+          avatar: '/static/logo.png',
+          email: '',
+          phone: '',
+          openid: 'mock_openid_' + Date.now(),
+          unionid: 'mock_unionid_' + Date.now()
+        }
+      }
+    }
+  } else {
+    return {
+      success: false,
+      message: '微信登录失败：授权码无效'
+    }
+  }
+}

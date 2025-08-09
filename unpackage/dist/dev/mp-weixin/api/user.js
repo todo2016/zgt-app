@@ -3,6 +3,9 @@ const utils_request = require("../utils/request.js");
 const login = (data) => {
   return utils_request.post("/user/login", data);
 };
+const wechatLogin = (data) => {
+  return utils_request.post("/user/wechat-login", data);
+};
 const getUserInfo = () => {
   return utils_request.get("/user/info");
 };
@@ -16,4 +19,5 @@ exports.getUserInfo = getUserInfo;
 exports.login = login;
 exports.logout = logout;
 exports.updateUserInfo = updateUserInfo;
+exports.wechatLogin = wechatLogin;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/api/user.js.map
