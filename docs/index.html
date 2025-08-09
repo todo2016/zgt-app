@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>掌柜通 - 烟酒店进销存管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .nav-item {
+            transition: all 0.2s ease;
+        }
+        .nav-item:hover {
+            transform: translateY(-2px);
+        }
+        .nav-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- 顶部导航栏 -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 fixed top-0 w-full z-50">
+        <div class="max-w-md mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <h1 class="text-lg font-bold text-gray-800">
+                    <i class="fas fa-store text-blue-600 mr-2"></i>
+                    掌柜通
+                </h1>
+                <div class="flex items-center space-x-3">
+                    <button onclick="showPage('pos')" class="text-gray-600 hover:text-blue-600 transition-colors relative">
+                        <i class="fas fa-shopping-cart text-lg"></i>
+                        <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
+                    </button>
+                    <button class="text-gray-600 hover:text-blue-600 transition-colors">
+                        <i class="fas fa-bell text-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区域 -->
+    <main class="pt-16 pb-20">
+        <!-- 首页仪表板 -->
+        <div id="home" class="page active">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <!-- 今日概览卡片 -->
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4">今日概览</h2>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <div id="home-sales" class="text-2xl font-bold text-green-600">¥2,580</div>
+                            <div class="text-sm text-gray-500">今日销售额</div>
+                        </div>
+                        <div class="text-center">
+                            <div id="home-orders" class="text-2xl font-bold text-blue-600">24</div>
+                            <div class="text-sm text-gray-500">今日订单</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 快捷功能 -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <button onclick="showPage('pos')" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl p-6 text-center hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                        <i class="fas fa-cash-register text-3xl mb-3"></i>
+                        <div class="font-semibold">收银台</div>
+                    </button>
+                    <button onclick="showPage('products')" class="bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl p-6 text-center hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                        <i class="fas fa-plus-circle text-3xl mb-3"></i>
+                        <div class="font-semibold">商品录入</div>
+                    </button>
+                    <button onclick="showPage('inventory')" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-xl p-6 text-center hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                        <i class="fas fa-boxes text-3xl mb-3"></i>
+                        <div class="font-semibold">库存管理</div>
+                    </button>
+                    <button onclick="showPage('reports')" class="bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl p-6 text-center hover:shadow-lg transition-all duration-200 transform hover:scale-105">
+                        <i class="fas fa-chart-bar text-3xl mb-3"></i>
+                        <div class="font-semibold">报表统计</div>
+                    </button>
+                </div>
+
+                <!-- 最近活动 -->
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">最近活动</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-sm text-gray-600">茅台飞天 53度 500ml 已售出 2瓶</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                            <span class="text-sm text-gray-600">五粮液 52度 500ml 库存不足</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
+                            <span class="text-sm text-gray-600">新商品录入：洋河蓝色经典</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 收银台页面 -->
+        <div id="pos" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-800">收银台</h2>
+                        <button onclick="showPage('home')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 搜索区域 -->
+                    <div class="mb-4">
+                        <div class="flex space-x-2">
+                            <input type="text" id="product-search" placeholder="搜索商品名称或分类" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <button onclick="searchProduct()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div id="search-results" class="mt-2" style="display: none;"></div>
+                    </div>
+
+                    <!-- 扫码区域 -->
+                    <div class="bg-gray-50 rounded-lg p-4 mb-4 text-center">
+                        <i class="fas fa-barcode text-4xl text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-500">点击扫码或手动输入商品</p>
+                    </div>
+
+                    <!-- 快速添加商品 -->
+                    <div class="mb-4">
+                        <h4 class="text-sm font-medium text-gray-700 mb-2">快速添加</h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="addToCart(1)" class="p-2 bg-blue-50 rounded-lg text-center hover:bg-blue-100 transition-colors">
+                                <div class="text-xs text-gray-600">茅台飞天</div>
+                                <div class="text-xs font-medium text-blue-600">¥1,299</div>
+                            </button>
+                            <button onclick="addToCart(2)" class="p-2 bg-blue-50 rounded-lg text-center hover:bg-blue-100 transition-colors">
+                                <div class="text-xs text-gray-600">五粮液</div>
+                                <div class="text-xs font-medium text-blue-600">¥899</div>
+                            </button>
+                            <button onclick="addToCart(3)" class="p-2 bg-blue-50 rounded-lg text-center hover:bg-blue-100 transition-colors">
+                                <div class="text-xs text-gray-600">洋河蓝色</div>
+                                <div class="text-xs font-medium text-blue-600">¥299</div>
+                            </button>
+                            <button onclick="addToCart(5)" class="p-2 bg-blue-50 rounded-lg text-center hover:bg-blue-100 transition-colors">
+                                <div class="text-xs text-gray-600">拉菲红酒</div>
+                                <div class="text-xs font-medium text-blue-600">¥599</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 购物车商品列表 -->
+                    <div id="cart-items" class="space-y-3 mb-4">
+                        <!-- 动态生成的购物车商品 -->
+                    </div>
+
+                    <!-- 总计 -->
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-lg font-semibold">总计</span>
+                            <span id="cart-total" class="text-2xl font-bold text-green-600">¥0.00</span>
+                        </div>
+                        <button onclick="completePayment()" class="w-full bg-green-500 text-white py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">
+                            确认支付
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商品录入页面 -->
+        <div id="products" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">商品录入</h2>
+                        <button onclick="showPage('home')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <form class="space-y-4">
+                        <!-- 拍照上传 -->
+                        <div class="text-center">
+                            <div class="w-24 h-24 bg-gray-100 rounded-lg mx-auto flex items-center justify-center mb-2">
+                                <i class="fas fa-camera text-2xl text-gray-400"></i>
+                            </div>
+                            <p class="text-sm text-gray-500">点击拍照或上传图片</p>
+                        </div>
+
+                        <!-- 商品名称 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">商品名称</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请输入商品名称">
+                        </div>
+
+                        <!-- 商品分类 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">商品分类</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option>白酒</option>
+                                <option>红酒</option>
+                                <option>啤酒</option>
+                                <option>洋酒</option>
+                                <option>其他</option>
+                            </select>
+                        </div>
+
+                        <!-- 价格和库存 -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">售价 (¥)</label>
+                                <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">库存数量</label>
+                                <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="0">
+                            </div>
+                        </div>
+
+                        <!-- 商品描述 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">商品描述</label>
+                            <textarea class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" rows="3" placeholder="请输入商品描述"></textarea>
+                        </div>
+
+                        <button type="submit" onclick="saveProduct(event)" class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                            保存商品
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 库存管理页面 -->
+        <div id="inventory" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">库存管理</h2>
+                        <button onclick="showPage('home')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- 筛选器 -->
+                    <div class="flex space-x-2 mb-4">
+                        <button class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm">全部</button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm">白酒</button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm">红酒</button>
+                        <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm">啤酒</button>
+                    </div>
+
+                    <!-- 库存列表 -->
+                    <div id="inventory-list" class="space-y-3">
+                        <!-- 动态生成的库存列表 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 报表统计页面 -->
+        <div id="reports" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">报表统计</h2>
+                        <button onclick="showPage('home')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- 销售统计 -->
+                    <div class="mb-6">
+                        <h3 class="text-md font-semibold text-gray-800 mb-3">销售统计</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-blue-50 p-4 rounded-lg">
+                                <div id="sales-total" class="text-2xl font-bold text-blue-600">¥2,580</div>
+                                <div class="text-sm text-gray-600">今日销售额</div>
+                            </div>
+                            <div class="bg-green-50 p-4 rounded-lg">
+                                <div id="orders-count" class="text-2xl font-bold text-green-600">24</div>
+                                <div class="text-sm text-gray-600">今日订单</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 库存预警 -->
+                    <div class="mb-6">
+                        <h3 class="text-md font-semibold text-gray-800 mb-3">库存预警</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                                <span class="text-sm text-gray-800">五粮液 52度 500ml</span>
+                                <span class="text-sm text-red-600 font-medium">库存不足</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+                                <span class="text-sm text-gray-800">泸州老窖 52度 500ml</span>
+                                <span class="text-sm text-orange-600 font-medium">库存偏低</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 销售趋势图 -->
+                    <div>
+                        <h3 class="text-md font-semibold text-gray-800 mb-3">销售趋势</h3>
+                        <div class="bg-gray-50 rounded-lg p-4 h-32 flex items-end justify-between">
+                            <div class="w-8 bg-blue-500 rounded-t" style="height: 60%"></div>
+                            <div class="w-8 bg-blue-500 rounded-t" style="height: 80%"></div>
+                            <div class="w-8 bg-blue-500 rounded-t" style="height: 40%"></div>
+                            <div class="w-8 bg-blue-500 rounded-t" style="height: 90%"></div>
+                            <div class="w-8 bg-blue-500 rounded-t" style="height: 70%"></div>
+                            <div class="w-8 bg-blue-500 rounded-t" style="height: 100%"></div>
+                            <div class="w-8 bg-blue-500 rounded-t" style="height: 85%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-2">
+                            <span>周一</span>
+                            <span>周二</span>
+                            <span>周三</span>
+                            <span>周四</span>
+                            <span>周五</span>
+                            <span>周六</span>
+                            <span>周日</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 员工管理页面 -->
+        <div id="employees" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">员工管理</h2>
+                        <button onclick="showPage('home')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- 员工列表 -->
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-800">张三</div>
+                                    <div class="text-sm text-gray-500">收银员</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-green-600">在线</div>
+                                <div class="text-xs text-gray-500">今日操作: 12次</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-green-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-800">李四</div>
+                                    <div class="text-sm text-gray-500">管理员</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-green-600">在线</div>
+                                <div class="text-xs text-gray-500">今日操作: 8次</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user text-gray-600"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-gray-800">王五</div>
+                                    <div class="text-sm text-gray-500">收银员</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-gray-500">离线</div>
+                                <div class="text-xs text-gray-500">最后登录: 2小时前</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 添加员工按钮 -->
+                    <button class="w-full mt-4 bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>添加员工
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 登录页面 -->
+        <div id="login" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="text-center mb-8">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-store text-3xl text-blue-600"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-800">掌柜通</h2>
+                        <p class="text-gray-500 mt-2">烟酒店进销存管理系统</p>
+                    </div>
+
+                    <form class="space-y-4" onsubmit="handleLogin(event)">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">用户名</label>
+                            <input type="text" id="login-username" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请输入用户名" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">密码</label>
+                            <input type="password" id="login-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请输入密码" required>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <span class="ml-2 text-sm text-gray-600">记住我</span>
+                            </label>
+                            <button type="button" onclick="showPage('forgot-password')" class="text-sm text-blue-600 hover:text-blue-800">
+                                忘记密码？
+                            </button>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                            登录
+                        </button>
+
+                        <div class="text-center">
+                            <span class="text-sm text-gray-600">还没有账号？</span>
+                            <button type="button" onclick="showPage('register')" class="text-sm text-blue-600 hover:text-blue-800 ml-1">
+                                立即注册
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- 快速登录 -->
+                    <div class="mt-6 pt-6 border-t border-gray-200">
+                        <p class="text-sm text-gray-500 text-center mb-4">快速登录（演示账号）</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="quickLogin('admin', 'admin123')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors">
+                                管理员
+                            </button>
+                            <button onclick="quickLogin('cashier', 'cashier123')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors">
+                                收银员
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 注册页面 -->
+        <div id="register" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">注册账号</h2>
+                        <button onclick="showPage('login')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <form class="space-y-4" onsubmit="handleRegister(event)">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">用户名</label>
+                            <input type="text" id="register-username" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请输入用户名" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">手机号</label>
+                            <input type="tel" id="register-phone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请输入手机号" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">密码</label>
+                            <input type="password" id="register-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请输入密码" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">确认密码</label>
+                            <input type="password" id="register-confirm-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请再次输入密码" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">角色</label>
+                            <select id="register-role" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="cashier">收银员</option>
+                                <option value="admin">管理员</option>
+                            </select>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" id="register-agree" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" required>
+                            <label for="register-agree" class="ml-2 text-sm text-gray-600">
+                                我已阅读并同意
+                                <button type="button" class="text-blue-600 hover:text-blue-800">用户协议</button>
+                                和
+                                <button type="button" class="text-blue-600 hover:text-blue-800">隐私政策</button>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                            注册
+                        </button>
+
+                        <div class="text-center">
+                            <span class="text-sm text-gray-600">已有账号？</span>
+                            <button type="button" onclick="showPage('login')" class="text-sm text-blue-600 hover:text-blue-800 ml-1">
+                                立即登录
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 忘记密码页面 -->
+        <div id="forgot-password" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">忘记密码</h2>
+                        <button onclick="showPage('login')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <form class="space-y-4" onsubmit="handleForgotPassword(event)">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">手机号</label>
+                            <input type="tel" id="forgot-phone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请输入注册时的手机号" required>
+                        </div>
+
+                        <div class="flex space-x-2">
+                            <input type="text" id="forgot-code" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="验证码" required>
+                            <button type="button" onclick="sendVerificationCode()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                                获取验证码
+                            </button>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">新密码</label>
+                            <input type="password" id="forgot-new-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请输入新密码" required>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                            重置密码
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 个人资料页面 -->
+        <div id="profile" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">个人资料</h2>
+                        <button onclick="showPage('home')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- 用户信息 -->
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-user text-2xl text-blue-600"></i>
+                        </div>
+                        <h3 id="profile-username" class="text-lg font-semibold text-gray-800">管理员</h3>
+                        <p id="profile-role" class="text-sm text-gray-500">管理员</p>
+                    </div>
+
+                    <!-- 功能菜单 -->
+                    <div class="space-y-3">
+                        <button onclick="showPage('edit-profile')" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-user-edit text-blue-600"></i>
+                                <span class="text-gray-800">编辑资料</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+
+                        <button onclick="showPage('change-password')" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-lock text-green-600"></i>
+                                <span class="text-gray-800">修改密码</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+
+                        <button onclick="showPage('settings')" class="w-full flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-cog text-orange-600"></i>
+                                <span class="text-gray-800">系统设置</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </button>
+
+                        <button onclick="handleLogout()" class="w-full flex items-center justify-between p-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-sign-out-alt text-red-600"></i>
+                                <span class="text-red-600">退出登录</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-red-400"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 编辑资料页面 -->
+        <div id="edit-profile" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">编辑资料</h2>
+                        <button onclick="showPage('profile')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <form class="space-y-4" onsubmit="handleEditProfile(event)">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">用户名</label>
+                            <input type="text" id="edit-username" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="管理员">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">手机号</label>
+                            <input type="tel" id="edit-phone" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="13800138000">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">邮箱</label>
+                            <input type="email" id="edit-email" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" value="admin@shopkeeper.com">
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                            保存修改
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 修改密码页面 -->
+        <div id="change-password" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">修改密码</h2>
+                        <button onclick="showPage('profile')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <form class="space-y-4" onsubmit="handleChangePassword(event)">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">当前密码</label>
+                            <input type="password" id="current-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请输入当前密码" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">新密码</label>
+                            <input type="password" id="new-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请输入新密码" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">确认新密码</label>
+                            <input type="password" id="confirm-new-password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="请再次输入新密码" required>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                            修改密码
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 设置页面 -->
+        <div id="settings" class="page">
+            <div class="max-w-md mx-auto px-4 py-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-lg font-semibold text-gray-800">设置</h2>
+                        <button onclick="showPage('home')" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- 设置选项 -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-store text-blue-600"></i>
+                                <span class="text-gray-800">店铺信息</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-download text-green-600"></i>
+                                <span class="text-gray-800">导出数据</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-bell text-orange-600"></i>
+                                <span class="text-gray-800">通知设置</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg" onclick="showPage('profile')">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-user-circle text-purple-600"></i>
+                                <span class="text-gray-800">个人资料</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-shield-alt text-purple-600"></i>
+                                <span class="text-gray-800">安全设置</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-info-circle text-blue-600"></i>
+                                <span class="text-gray-800">关于掌柜通</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-sm text-gray-500">v1.0.0</span>
+                                <i class="fas fa-chevron-right text-gray-400"></i>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg" onclick="handleLogout()">
+                            <div class="flex items-center space-x-3">
+                                <i class="fas fa-sign-out-alt text-red-600"></i>
+                                <span class="text-red-600">退出登录</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-red-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部导航栏 -->
+    <nav class="bg-white shadow-lg border-t border-gray-200 fixed bottom-0 w-full z-50">
+        <div class="max-w-md mx-auto px-4 py-2">
+            <div class="flex justify-around">
+                <button onclick="showPage('home')" class="nav-item active flex flex-col items-center py-2 px-3 rounded-lg">
+                    <i class="fas fa-home text-lg mb-1"></i>
+                    <span class="text-xs">首页</span>
+                </button>
+                <button onclick="showPage('pos')" class="nav-item flex flex-col items-center py-2 px-3 rounded-lg">
+                    <i class="fas fa-cash-register text-lg mb-1"></i>
+                    <span class="text-xs">收银</span>
+                </button>
+                <button onclick="showPage('inventory')" class="nav-item flex flex-col items-center py-2 px-3 rounded-lg">
+                    <i class="fas fa-boxes text-lg mb-1"></i>
+                    <span class="text-xs">库存</span>
+                </button>
+                <button onclick="showPage('reports')" class="nav-item flex flex-col items-center py-2 px-3 rounded-lg">
+                    <i class="fas fa-chart-bar text-lg mb-1"></i>
+                    <span class="text-xs">报表</span>
+                </button>
+                <button onclick="showPage('settings')" class="nav-item flex flex-col items-center py-2 px-3 rounded-lg">
+                    <i class="fas fa-cog text-lg mb-1"></i>
+                    <span class="text-xs">设置</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        // 全局数据管理
+        const AppData = {
+            products: [
+                { id: 1, name: '茅台飞天 53度', category: '白酒', price: 1299, stock: 15, unit: '500ml', image: 'wine-bottle' },
+                { id: 2, name: '五粮液 52度', category: '白酒', price: 899, stock: 3, unit: '500ml', image: 'wine-bottle' },
+                { id: 3, name: '洋河蓝色经典', category: '白酒', price: 299, stock: 28, unit: '500ml', image: 'wine-bottle' },
+                { id: 4, name: '泸州老窖 52度', category: '白酒', price: 199, stock: 8, unit: '500ml', image: 'wine-bottle' },
+                { id: 5, name: '拉菲红酒', category: '红酒', price: 599, stock: 12, unit: '750ml', image: 'wine-bottle' },
+                { id: 6, name: '青岛啤酒', category: '啤酒', price: 8, stock: 50, unit: '330ml', image: 'wine-bottle' }
+            ],
+            cart: [],
+            sales: [],
+            employees: [
+                { id: 1, name: '张三', role: '收银员', status: 'online', operations: 12 },
+                { id: 2, name: '李四', role: '管理员', status: 'online', operations: 8 },
+                { id: 3, name: '王五', role: '收银员', status: 'offline', lastLogin: '2小时前' }
+            ],
+            todaySales: 2580,
+            todayOrders: 24,
+            // 用户认证相关
+            currentUser: null,
+            users: [
+                { username: 'admin', password: 'admin123', role: 'admin', name: '管理员', phone: '13800138000', email: 'admin@shopkeeper.com' },
+                { username: 'cashier', password: 'cashier123', role: 'cashier', name: '收银员', phone: '13800138001', email: 'cashier@shopkeeper.com' }
+            ]
+        };
+
+        // 初始化数据
+        function initData() {
+            const savedData = localStorage.getItem('shopkeeperData');
+            if (savedData) {
+                Object.assign(AppData, JSON.parse(savedData));
+            }
+        }
+
+        // 保存数据
+        function saveData() {
+            localStorage.setItem('shopkeeperData', JSON.stringify(AppData));
+        }
+
+        // 页面切换
+        function showPage(pageId) {
+            // 需要认证的页面
+            const authPages = ['home', 'pos', 'inventory', 'reports', 'settings', 'profile', 'edit-profile', 'change-password'];
+            
+            if (authPages.includes(pageId) && !AppData.currentUser) {
+                showToast('请先登录', 'error');
+                pageId = 'login';
+            }
+            
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            document.getElementById(pageId).classList.add('active');
+            
+            // 更新导航栏状态（仅对主页面）
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const navButtons = document.querySelectorAll('.nav-item');
+            const pageMap = {
+                'home': 0,
+                'pos': 1,
+                'inventory': 2,
+                'reports': 3,
+                'settings': 4
+            };
+            
+            if (pageMap[pageId] !== undefined) {
+                navButtons[pageMap[pageId]].classList.add('active');
+            }
+
+            // 页面特定初始化
+            if (pageId === 'pos') {
+                updateCartDisplay();
+            } else if (pageId === 'inventory') {
+                updateInventoryDisplay();
+            } else if (pageId === 'reports') {
+                updateReportsDisplay();
+            } else if (pageId === 'profile') {
+                updateUserInterface();
+            }
+        }
+
+        // 商品搜索
+        function searchProducts(query) {
+            const results = AppData.products.filter(product => 
+                product.name.toLowerCase().includes(query.toLowerCase()) ||
+                product.category.toLowerCase().includes(query.toLowerCase())
+            );
+            return results;
+        }
+
+        // 添加到购物车
+        function addToCart(productId) {
+            const product = AppData.products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItem = AppData.cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                AppData.cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: 1,
+                    unit: product.unit
+                });
+            }
+            updateCartDisplay();
+            showToast('商品已添加到购物车');
+        }
+
+        // 从购物车移除
+        function removeFromCart(productId) {
+            const index = AppData.cart.findIndex(item => item.id === productId);
+            if (index > -1) {
+                if (AppData.cart[index].quantity > 1) {
+                    AppData.cart[index].quantity--;
+                } else {
+                    AppData.cart.splice(index, 1);
+                }
+            }
+            updateCartDisplay();
+        }
+
+        // 更新购物车显示
+        function updateCartDisplay() {
+            const cartContainer = document.getElementById('cart-items');
+            if (!cartContainer) return;
+
+            cartContainer.innerHTML = '';
+            let total = 0;
+
+            AppData.cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+
+                cartContainer.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-wine-bottle text-blue-600"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-800">${item.name}</div>
+                                <div class="text-sm text-gray-500">${item.unit}</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="removeFromCart(${item.id})" class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                <i class="fas fa-minus text-sm"></i>
+                            </button>
+                            <span class="font-medium">${item.quantity}</span>
+                            <button onclick="addToCart(${item.id})" class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center">
+                                <i class="fas fa-plus text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('cart-total').textContent = `¥${total.toFixed(2)}`;
+            document.getElementById('cart-count').textContent = AppData.cart.length;
+        }
+
+        // 完成支付
+        function completePayment() {
+            if (AppData.cart.length === 0) {
+                showToast('购物车为空', 'error');
+                return;
+            }
+
+            const total = AppData.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            // 创建销售记录
+            const sale = {
+                id: Date.now(),
+                items: [...AppData.cart],
+                total: total,
+                date: new Date().toISOString(),
+                employee: '张三'
+            };
+            
+            AppData.sales.push(sale);
+            AppData.todaySales += total;
+            AppData.todayOrders++;
+
+            // 更新库存
+            AppData.cart.forEach(cartItem => {
+                const product = AppData.products.find(p => p.id === cartItem.id);
+                if (product) {
+                    product.stock -= cartItem.quantity;
+                }
+            });
+
+            // 清空购物车
+            AppData.cart = [];
+            
+            saveData();
+            updateCartDisplay();
+            updateHomeData();
+            updateReportsDisplay();
+            showToast('支付成功！', 'success');
+            
+            // 显示支付成功页面
+            showPaymentSuccess(total);
+        }
+
+        // 显示支付成功页面
+        function showPaymentSuccess(total) {
+            const successHtml = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white rounded-xl p-6 max-w-sm w-full mx-4">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-check text-2xl text-green-600"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-gray-800 mb-2">支付成功</h3>
+                            <p class="text-2xl font-bold text-green-600 mb-4">¥${total.toFixed(2)}</p>
+                            <p class="text-sm text-gray-500 mb-6">交易已完成</p>
+                            <button onclick="closePaymentSuccess()" class="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold">
+                                继续收银
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', successHtml);
+        }
+
+        // 关闭支付成功页面
+        function closePaymentSuccess() {
+            const overlay = document.querySelector('.fixed.inset-0');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        // 更新库存显示
+        function updateInventoryDisplay() {
+            const inventoryContainer = document.getElementById('inventory-list');
+            if (!inventoryContainer) return;
+
+            inventoryContainer.innerHTML = '';
+            
+            AppData.products.forEach(product => {
+                const status = product.stock <= 5 ? '库存不足' : product.stock <= 10 ? '库存偏低' : '正常';
+                const statusColor = product.stock <= 5 ? 'text-red-600' : product.stock <= 10 ? 'text-orange-600' : 'text-green-600';
+                const bgColor = product.stock <= 5 ? 'bg-red-100' : product.stock <= 10 ? 'bg-orange-100' : 'bg-blue-100';
+                const iconColor = product.stock <= 5 ? 'text-red-600' : product.stock <= 10 ? 'text-orange-600' : 'text-blue-600';
+
+                inventoryContainer.innerHTML += `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 ${bgColor} rounded-lg flex items-center justify-center">
+                                <i class="fas fa-wine-bottle ${iconColor}"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-gray-800">${product.name}</div>
+                                <div class="text-sm text-gray-500">${product.unit}</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium text-gray-800">库存: ${product.stock}</div>
+                            <div class="text-sm ${statusColor}">${status}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 更新报表显示
+        function updateReportsDisplay() {
+            const salesTotal = document.getElementById('sales-total');
+            const ordersCount = document.getElementById('orders-count');
+            
+            if (salesTotal) salesTotal.textContent = `¥${AppData.todaySales.toFixed(2)}`;
+            if (ordersCount) ordersCount.textContent = AppData.todayOrders;
+        }
+
+        // 显示提示信息
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `fixed top-20 left-1/2 transform -translate-x-1/2 z-50 px-4 py-2 rounded-lg text-white text-sm ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                'bg-blue-500'
+            }`;
+            toast.textContent = message;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // 商品搜索功能
+        function searchProduct() {
+            const searchInput = document.getElementById('product-search');
+            const query = searchInput.value.trim();
+            
+            if (!query) {
+                showToast('请输入搜索关键词', 'error');
+                return;
+            }
+
+            const results = searchProducts(query);
+            if (results.length === 0) {
+                showToast('未找到相关商品', 'error');
+                return;
+            }
+
+            // 显示搜索结果
+            showSearchResults(results);
+        }
+
+        // 显示搜索结果
+        function showSearchResults(results) {
+            const resultsHtml = results.map(product => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg mb-2">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <i class="fas fa-wine-bottle text-blue-600"></i>
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-800">${product.name}</div>
+                            <div class="text-sm text-gray-500">${product.category} - ${product.unit}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-medium text-gray-800">¥${product.price}</div>
+                        <button onclick="addToCart(${product.id})" class="mt-1 px-3 py-1 bg-blue-500 text-white text-xs rounded">
+                            添加
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            const searchResultsContainer = document.getElementById('search-results');
+            if (searchResultsContainer) {
+                searchResultsContainer.innerHTML = resultsHtml;
+                searchResultsContainer.style.display = 'block';
+            }
+        }
+
+        // 保存新商品
+        function saveProduct(event) {
+            event.preventDefault();
+            
+            const form = event.target.closest('form');
+            const name = form.querySelector('input[placeholder="请输入商品名称"]').value;
+            const category = form.querySelector('select').value;
+            const price = parseFloat(form.querySelector('input[type="number"]').value);
+            const stock = parseInt(form.querySelector('input[placeholder="0"]').value);
+            const description = form.querySelector('textarea').value;
+            
+            if (!name || !price || !stock) {
+                showToast('请填写完整的商品信息', 'error');
+                return;
+            }
+            
+            const newProduct = {
+                id: Date.now(),
+                name: name,
+                category: category,
+                price: price,
+                stock: stock,
+                unit: '500ml',
+                image: 'wine-bottle',
+                description: description
+            };
+            
+            AppData.products.push(newProduct);
+            saveData();
+            updateInventoryDisplay();
+            
+            // 清空表单
+            form.reset();
+            showToast('商品保存成功！', 'success');
+        }
+
+        // 更新首页数据
+        function updateHomeData() {
+            const homeSales = document.getElementById('home-sales');
+            const homeOrders = document.getElementById('home-orders');
+            
+            if (homeSales) homeSales.textContent = `¥${AppData.todaySales.toFixed(2)}`;
+            if (homeOrders) homeOrders.textContent = AppData.todayOrders;
+        }
+
+        // 用户认证相关函数
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            const user = AppData.users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                AppData.currentUser = user;
+                saveData();
+                showToast('登录成功！', 'success');
+                showPage('home');
+                updateUserInterface();
+            } else {
+                showToast('用户名或密码错误', 'error');
+            }
+        }
+
+        function quickLogin(username, password) {
+            document.getElementById('login-username').value = username;
+            document.getElementById('login-password').value = password;
+            handleLogin(new Event('submit'));
+        }
+
+        function handleRegister(event) {
+            event.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const phone = document.getElementById('register-phone').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const role = document.getElementById('register-role').value;
+            const agree = document.getElementById('register-agree').checked;
+            
+            if (password !== confirmPassword) {
+                showToast('两次输入的密码不一致', 'error');
+                return;
+            }
+            
+            if (!agree) {
+                showToast('请同意用户协议和隐私政策', 'error');
+                return;
+            }
+            
+            if (AppData.users.find(u => u.username === username)) {
+                showToast('用户名已存在', 'error');
+                return;
+            }
+            
+            const newUser = {
+                username: username,
+                password: password,
+                role: role,
+                name: username,
+                phone: phone,
+                email: ''
+            };
+            
+            AppData.users.push(newUser);
+            saveData();
+            showToast('注册成功！请登录', 'success');
+            showPage('login');
+        }
+
+        function handleForgotPassword(event) {
+            event.preventDefault();
+            const phone = document.getElementById('forgot-phone').value;
+            const code = document.getElementById('forgot-code').value;
+            const newPassword = document.getElementById('forgot-new-password').value;
+            
+            // 模拟验证码验证
+            if (code !== '123456') {
+                showToast('验证码错误', 'error');
+                return;
+            }
+            
+            const user = AppData.users.find(u => u.phone === phone);
+            if (user) {
+                user.password = newPassword;
+                saveData();
+                showToast('密码重置成功！', 'success');
+                showPage('login');
+            } else {
+                showToast('手机号不存在', 'error');
+            }
+        }
+
+        function sendVerificationCode() {
+            const phone = document.getElementById('forgot-phone').value;
+            if (!phone) {
+                showToast('请先输入手机号', 'error');
+                return;
+            }
+            showToast('验证码已发送：123456', 'success');
+        }
+
+        function handleLogout() {
+            AppData.currentUser = null;
+            AppData.cart = [];
+            saveData();
+            showToast('已退出登录', 'info');
+            showPage('login');
+            updateUserInterface();
+        }
+
+        function handleEditProfile(event) {
+            event.preventDefault();
+            const username = document.getElementById('edit-username').value;
+            const phone = document.getElementById('edit-phone').value;
+            const email = document.getElementById('edit-email').value;
+            
+            if (AppData.currentUser) {
+                AppData.currentUser.name = username;
+                AppData.currentUser.phone = phone;
+                AppData.currentUser.email = email;
+                saveData();
+                updateUserInterface();
+                showToast('资料修改成功！', 'success');
+                showPage('profile');
+            }
+        }
+
+        function handleChangePassword(event) {
+            event.preventDefault();
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmNewPassword = document.getElementById('confirm-new-password').value;
+            
+            if (AppData.currentUser.password !== currentPassword) {
+                showToast('当前密码错误', 'error');
+                return;
+            }
+            
+            if (newPassword !== confirmNewPassword) {
+                showToast('两次输入的新密码不一致', 'error');
+                return;
+            }
+            
+            AppData.currentUser.password = newPassword;
+            saveData();
+            showToast('密码修改成功！', 'success');
+            showPage('profile');
+        }
+
+        function updateUserInterface() {
+            const profileUsername = document.getElementById('profile-username');
+            const profileRole = document.getElementById('profile-role');
+            
+            if (AppData.currentUser) {
+                if (profileUsername) profileUsername.textContent = AppData.currentUser.name;
+                if (profileRole) profileRole.textContent = AppData.currentUser.role === 'admin' ? '管理员' : '收银员';
+            }
+        }
+
+        function checkAuth() {
+            if (!AppData.currentUser) {
+                showPage('login');
+                return false;
+            }
+            return true;
+        }
+
+        // 初始化应用
+        function initApp() {
+            initData();
+            updateInventoryDisplay();
+            updateReportsDisplay();
+            updateHomeData();
+            updateUserInterface();
+            
+            // 检查登录状态
+            if (!AppData.currentUser) {
+                showPage('login');
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>

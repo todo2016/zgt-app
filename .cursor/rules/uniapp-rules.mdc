@@ -1,6 +1,9 @@
 ---
-description:
+description: 前端阶段规则 - 基于原型实现 UI、生成 mock 数据和接口文档
 globs:
+  - "**/*.vue"
+  - "**/*.js"
+  - "mock/**/*.json"
 alwaysApply: false
 ---
 # 技术栈要求

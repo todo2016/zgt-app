@@ -9,12 +9,11 @@
     "postcss": false,
     "minified": false,
     "newFeature": true,
-    "bigPackageSizeSupport": true,
-    "minifyWXML": true
+    "bigPackageSizeSupport": true
   },
   "compileType": "miniprogram",
   "libVersion": "",
-  "appid": "wxb5a271cd4990284a",
+  "appid": "touristappid",
   "projectname": "zgt-app",
   "condition": {
     "search": {

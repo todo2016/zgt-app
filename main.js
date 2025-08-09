@@ -1,4 +1,7 @@
 import App from './App'
+import { createPinia } from 'pinia'
+import { setupMock } from './mock'
+import './mock/control'
 
 // #ifndef VUE3
 import Vue from 'vue'
@@ -15,6 +18,17 @@ app.$mount()
 import { createSSRApp } from 'vue'
 export function createApp() {
   const app = createSSRApp(App)
+  
+  // 集成pinia
+  const pinia = createPinia()
+  app.use(pinia)
+  
+  // 启动 Mock 服务（仅在开发环境）
+  console.log('当前环境:', process.env.NODE_ENV)
+  if (process.env.NODE_ENV === 'development') {
+    setupMock()
+  }
+  
   return {
     app
   }
